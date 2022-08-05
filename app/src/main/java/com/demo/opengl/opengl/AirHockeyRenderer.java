@@ -17,13 +17,18 @@ import static android.opengl.GLES20.glUniformMatrix4fv;
 import static android.opengl.GLES20.glUseProgram;
 import static android.opengl.GLES20.glVertexAttribPointer;
 import static android.opengl.GLES20.glViewport;
+import static android.opengl.Matrix.multiplyMM;
 import static android.opengl.Matrix.orthoM;
+import static android.opengl.Matrix.rotateM;
+import static android.opengl.Matrix.setIdentityM;
+import static android.opengl.Matrix.translateM;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 
 import com.demo.opengl.R;
 import com.demo.opengl.utils.LoggerConfig;
+import com.demo.opengl.utils.MatrixHelper;
 import com.demo.opengl.utils.ShaderHelper;
 import com.demo.opengl.utils.TextResourceReader;
 
@@ -57,6 +62,7 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
     private final float[] projectionMatrix = new float[16];
     private int uMatrixLocation;
 
+    private final float[] modelMatrix = new float[16];
     public AirHockeyRenderer(Context context) {
         this.context = context;
         float[] tableVerticesWithTriangles = {
@@ -127,13 +133,28 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
         glViewport(0, 0, width, height);
 
-        final float aspectRatio = width > height ?
-                (float) width / (float) height : (float) height / (float) width;
-        if (width > height) {
-            orthoM(projectionMatrix, 0, -aspectRatio , aspectRatio, -1f, 1f, -1f, 1f);
-        } else {
-            orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
-        }
+//        final float aspectRatio = width > height ?
+//                (float) width / (float) height : (float) height / (float) width;
+//        if (width > height) {
+//            orthoM(projectionMatrix, 0, -aspectRatio , aspectRatio, -1f, 1f, -1f, 1f);
+//        } else {
+//            orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
+//        }
+
+        MatrixHelper.perspectiveM(projectionMatrix,45,(float) width/(float) height,1f,10f);
+        setIdentityM(modelMatrix,0);
+        translateM(modelMatrix,0,0f,0f,-2f);
+
+
+        //旋转矩阵
+        translateM(modelMatrix,0,0f,0f,-2.5f);
+        rotateM(modelMatrix,0,-60f,1f,0f,0f);
+
+        // fuzhi
+        final float[] temp = new float[16];
+        multiplyMM(temp,0,projectionMatrix,0,modelMatrix,0);
+        System.arraycopy(temp,0,projectionMatrix,0,temp.length);
+
     }
 
     @Override
